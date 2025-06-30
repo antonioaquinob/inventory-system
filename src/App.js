@@ -93,64 +93,24 @@ const [itemList, setItemList] = useState(() => {
   }
   return (
     <div className="App">
-      {/* <div>
-        <input type="text" placeholder='Enter Item name...' value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="text" placeholder='Enter Item brand...' value={brand} onChange={(e) => setBrand(e.target.value)} />
-        <input type="text" placeholder='Enter Item category...' value={category} onChange={(e) => setCategory(e.target.value)} />
-        <input type="number" placeholder='Enter Item quantity...' value={quantity} onChange={(e) => setQuantity(e.target.value)} />
-        <input type="number" placeholder='Enter Item critical limit...' value={criticalLimit} onChange={(e) => setCriticalLimit(e.target.value)} />
-
-        <button onClick={addEditItem}>{editItemID === null ? 'Add' : 'Update'}</button>
-      </div>
-
-      {itemList.map(item=> (
-        <div key={item.id}>
-          <p>{item.id}</p>
-          <p>{item.name}</p>
-          <p>{item.brand}</p>
-          <p>{item.category}</p>
-          <p>{item.quantity}</p>
-          <p>{item.criticalLimit}</p>
-
-          {editItemID === null && <button onClick={()=>startItemEditing(item)}>Edit</button>}
-          <button onClick={()=>deleteItem(item.id)}>Delete</button>
-        </div>
-      ))}
-      
-      <div>
-        <h1>Critical items</h1>
-        {criticalItemList.length === 0 ? <h3>No critical item(s)</h3> :
-        criticalItemList.map(item => (
-          <div key={item.id}>
-            <p>{item.id}</p>
-            <p>{item.name}</p>
-            <p>{item.brand}</p>
-            <p>{item.category}</p>
-            <p>{item.quantity}</p>
-            <p>{item.criticalLimit}</p>
-          </div>
-        ))
-        }
-      </div> */}
-
-    <Items
-      onName={name}
-      onBrand={brand}
-      onCategory={category}
-      onQuantity={quantity}
-      onCriticalLimit={criticalLimit}
-      onSetName={setName}
-      onSetBrand={setBrand}
-      onSetCategory={setCategory}
-      onSetQuantity={setQuantity}
-      onSetCriticalLimit={setCriticalLimit}
-      onAddEditItem={addEditItem}
-      onEditItemID={editItemID}
-      onItemList={itemList}
-      onStartItemEditing={startItemEditing}
-      onDeleteItem={deleteItem}
-      onCriticalItemList={criticalItemList}
-    />
+      <Items
+        onName={name}
+        onBrand={brand}
+        onCategory={category}
+        onQuantity={quantity}
+        onCriticalLimit={criticalLimit}
+        onSetName={setName}
+        onSetBrand={setBrand}
+        onSetCategory={setCategory}
+        onSetQuantity={setQuantity}
+        onSetCriticalLimit={setCriticalLimit}
+        onAddEditItem={addEditItem}
+        onEditItemID={editItemID}
+        onItemList={itemList}
+        onStartItemEditing={startItemEditing}
+        onDeleteItem={deleteItem}
+        onCriticalItemList={criticalItemList}
+      />
 
     </div>
   );
