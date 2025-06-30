@@ -1,13 +1,19 @@
 
 import './App.css';
 import { useState, useEffect } from 'react';
+import Items from './Items.jsx'
 function App() {
   const [name, setName] = useState('')
   const [brand, setBrand] = useState('')
   const [category, setCategory] = useState('')
   const [quantity, setQuantity] = useState('')
-  const [criticalLimit, setCriticaLimit] = useState('')
-  const [itemList, setItemList] = useState([])
+  const [criticalLimit, setCriticalLimit] = useState('')
+  // const [itemList, setItemList] = useState([])
+const [itemList, setItemList] = useState(() => {
+  const stored = localStorage.getItem("itemList");
+  return stored ? JSON.parse(stored).map(item => (
+    {...item, quantity: Number(item.quantity), criticalLimit: Number(item.criticalLimit)})) : [];
+});
 
   const [username, setUsername] = useState('')
   const [fmlName, setFmlName] = useState('')
@@ -18,20 +24,21 @@ function App() {
   const [editItemID, setEditItemID] = useState(null)
   const [editUserID, setEditUserID] = useState(null)
 
-
   const [criticalItemList, setCriticalItemList] = useState([])
-  useEffect(() => {
-    const criticalItemsFiltered = itemList.filter(item=>item.quantity <= item.criticalLimit)
 
+  useEffect(() => {
+    localStorage.setItem("itemList", JSON.stringify(itemList));
+
+    const criticalItemsFiltered = itemList.filter(item=>item.quantity <= item.criticalLimit)
     setCriticalItemList(criticalItemsFiltered)
-  }, [itemList]); // Runs whenever `items` is updated
+  }, [itemList]);
 
   const flushItem = ()=>{
     setName('')
     setBrand('')
     setCategory('')
     setQuantity('')
-    setCriticaLimit('')
+    setCriticalLimit('')
     setEditItemID(null)
   }
 
@@ -49,10 +56,10 @@ function App() {
     setBrand(item.brand)
     setCategory(item.category)
     setQuantity(item.quantity)
-    setCriticaLimit(item.criticalLimit)
+    setCriticalLimit(item.criticalLimit)
   }
   const addEditItem = ()=>{
-    if(name.trim() === null || brand.trim() === null || category.trim() === null || quantity === 0 || criticalLimit === 0) return;
+    if (!name.trim() || !brand.trim() || !category.trim() || quantity === '' || criticalLimit === '') return;
 
     if(editItemID === null){
       // Adding item
@@ -86,45 +93,25 @@ function App() {
   }
   return (
     <div className="App">
-      <div>
-        <input type="text" placeholder='Enter Item name...' value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="text" placeholder='Enter Item brand...' value={brand} onChange={(e) => setBrand(e.target.value)} />
-        <input type="text" placeholder='Enter Item category...' value={category} onChange={(e) => setCategory(e.target.value)} />
-        <input type="number" placeholder='Enter Item quantity...' value={quantity} onChange={(e) => setQuantity(e.target.value)} />
-        <input type="number" placeholder='Enter Item critical limit...' value={criticalLimit} onChange={(e) => setCriticaLimit(e.target.value)} />
+      <Items
+        onName={name}
+        onBrand={brand}
+        onCategory={category}
+        onQuantity={quantity}
+        onCriticalLimit={criticalLimit}
+        onSetName={setName}
+        onSetBrand={setBrand}
+        onSetCategory={setCategory}
+        onSetQuantity={setQuantity}
+        onSetCriticalLimit={setCriticalLimit}
+        onAddEditItem={addEditItem}
+        onEditItemID={editItemID}
+        onItemList={itemList}
+        onStartItemEditing={startItemEditing}
+        onDeleteItem={deleteItem}
+        onCriticalItemList={criticalItemList}
+      />
 
-        <button onClick={addEditItem}>{editItemID === null ? 'Add' : 'Update'}</button>
-      </div>
-
-      {itemList.map(item=> (
-        <div key={item.id}>
-          <p>{item.id}</p>
-          <p>{item.name}</p>
-          <p>{item.brand}</p>
-          <p>{item.category}</p>
-          <p>{item.quantity}</p>
-          <p>{item.criticalLimit}</p>
-
-          {editItemID === null && <button onClick={()=>startItemEditing(item)}>Edit</button>}
-          <button onClick={()=>deleteItem(item.id)}>Delete</button>
-        </div>
-      ))}
-
-      <div>
-        <h1>Critical items</h1>
-        {criticalItemList.length === 0 ? <h3>No critical item(s)</h3> :
-        criticalItemList.map(item => (
-          <div key={item.id}>
-            <p>{item.id}</p>
-            <p>{item.name}</p>
-            <p>{item.brand}</p>
-            <p>{item.category}</p>
-            <p>{item.quantity}</p>
-            <p>{item.criticalLimit}</p>
-          </div>
-        ))
-        }
-      </div>
     </div>
   );
 }
