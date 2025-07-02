@@ -1,6 +1,8 @@
 
 import './App.css';
 import { useState, useEffect } from 'react';
+import {collection, getDocs, addDoc, updateDoc, deleteDoc, doc} from 'firebase/firestore'
+import {db} from './firebaseConfig.js'
 import Items from './Items.jsx'
 function App() {
   const [name, setName] = useState('')
@@ -14,20 +16,32 @@ const [itemList, setItemList] = useState(() => {
   return stored ? JSON.parse(stored).map(item => (
     {...item, quantity: Number(item.quantity), criticalLimit: Number(item.criticalLimit)})) : [];
 });
-
-  const [username, setUsername] = useState('')
-  const [fmlName, setFmlName] = useState('')
-  const [email, setEmail] = useState('')
-  const [role, setRole] = useState('')
-  const [userList, setUserList] = useState([])
-
+  
   const [editItemID, setEditItemID] = useState(null)
-  const [editUserID, setEditUserID] = useState(null)
-
   const [criticalItemList, setCriticalItemList] = useState([])
 
+  // const [username, setUsername] = useState('')
+  // const [fmlName, setFmlName] = useState('')
+  // const [email, setEmail] = useState('')
+  // const [role, setRole] = useState('')
+  // const [userList, setUserList] = useState([])
+
+  // const [editUserID, setEditUserID] = useState(null)
   useEffect(() => {
-    localStorage.setItem("itemList", JSON.stringify(itemList));
+    const fetchItems = async () => {
+      const firebaseCollection  = await getDocs(collection(db, "items"))
+      const items = firebaseCollection.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      setItemList(items)  
+      setCriticalItemList(items.filter(item => item.quantity <= item.criticalLimit))
+    }
+
+  fetchItems()
+  }, [])
+
+  useEffect(() => {
 
     const criticalItemsFiltered = itemList.filter(item=>item.quantity <= item.criticalLimit)
     setCriticalItemList(criticalItemsFiltered)
@@ -42,13 +56,13 @@ const [itemList, setItemList] = useState(() => {
     setEditItemID(null)
   }
 
-  const flushUser = ()=>{
-    setUsername('')
-    setFmlName('')
-    setEmail('')
-    setRole('')
-    setEditUserID(null)
-  }
+  // const flushUser = ()=>{
+  //   setUsername('')
+  //   setFmlName('')
+  //   setEmail('')
+  //   setRole('')
+  //   setEditUserID(null)
+  // }
   
   const startItemEditing = (item)=>{
     setEditItemID(item.id)
@@ -58,35 +72,46 @@ const [itemList, setItemList] = useState(() => {
     setQuantity(item.quantity)
     setCriticalLimit(item.criticalLimit)
   }
-  const addEditItem = ()=>{
+  const addEditItem = async ()=>{
     if (!name.trim() || !brand.trim() || !category.trim() || quantity === '' || criticalLimit === '') return;
 
     if(editItemID === null){
       // Adding item
-
+      
       const newItem = {
-        id: itemList.length === 0 ? 1 : itemList[itemList.length - 1].id + 1,
         name: name,
         brand:brand,
         category: category,
         quantity: Number(quantity),
         criticalLimit: Number(criticalLimit)
       }
-
-      setItemList([...itemList, newItem])
+      
+      const addDocRef = await addDoc(collection(db, "items"), newItem)
+      setItemList([...itemList, {...newItem, id: addDocRef.id}])
     }else{
       // Edit item
-      const updateItem = itemList.map(item => item.id === editItemID ? 
-        {...item, name: name, brand: brand, category: category, quantity: Number(quantity), criticalLimit: Number(criticalLimit)} :
-        item
-      )
-
-      setItemList(updateItem)
+      const itemRef = doc(db, "items", editItemID)
+        const updatedItem = {
+                            name,
+                            brand,
+                            category,
+                            quantity: Number(quantity),
+                            criticalLimit: Number(criticalLimit),
+                          }
+      
+      const updateData = await updateDoc(itemRef, updatedItem)
+      setItemList(itemList.map(
+        item=> item.id === editItemID 
+        ? { ...updatedItem, id: editItemID } 
+        : item
+      ))
       }
       flushItem()
     }
 
   const deleteItem = (id)=>{
+
+    const deleteDoc = (doc(db, "items", id))
     const filterItem = itemList.filter(item=> item.id !== id)
 
     setItemList(filterItem)
